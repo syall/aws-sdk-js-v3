@@ -1,14 +1,10 @@
+import { AwsCredentialIdentity, Identity } from "./identity";
 import { Provider } from "./util";
-
-export interface AwsCredentialIdentity {
-  /**
-   * A {Date} when the identity or credential will no longer be accepted.
-   */
-  readonly expiration?: Date;
-}
 
 /**
  * An object representing temporary or permanent AWS credentials.
+ *
+ * @deprecated Use {@AwsCredentialIdentity}
  */
 export interface Credentials extends AwsCredentialIdentity {
   /**
@@ -28,4 +24,7 @@ export interface Credentials extends AwsCredentialIdentity {
   readonly sessionToken?: string;
 }
 
-export type CredentialProvider = Provider<Credentials>;
+/**
+ * @deprecated Use {@AwsCredentialIdentityProvider}
+ */
+type CredentialProvider = Provider<Credentials>;
