@@ -2,16 +2,10 @@
 const yargs = require("yargs");
 const path = require("path");
 const { emptyDirSync, rmdirSync } = require("fs-extra");
-const { generateClients, generateGenericClient, generateProtocolTests } = require("./code-gen");
+const { generateClients } = require("./code-gen");
 const { codeOrdering } = require("./code-ordering");
 const { copyToClients, copyServerTests } = require("./copy-to-clients");
-const {
-  CODE_GEN_SDK_OUTPUT_DIR,
-  CODE_GEN_GENERIC_CLIENT_OUTPUT_DIR,
-  CODE_GEN_PROTOCOL_TESTS_OUTPUT_DIR,
-  DEFAULT_CODE_GEN_INPUT_DIR,
-  TEMP_CODE_GEN_INPUT_DIR,
-} = require("./code-gen-dir");
+const { CODE_GEN_SDK_OUTPUT_DIR, DEFAULT_CODE_GEN_INPUT_DIR, TEMP_CODE_GEN_INPUT_DIR } = require("./code-gen-dir");
 const { prettifyCode } = require("./code-prettify");
 const { eslintFixCode } = require("./code-eslint-fix");
 
@@ -56,13 +50,9 @@ const {
 (async () => {
   try {
     if (serverOnly === true) {
-      await generateProtocolTests();
       await eslintFixCode();
-      await prettifyCode(CODE_GEN_PROTOCOL_TESTS_OUTPUT_DIR);
-      await copyServerTests(CODE_GEN_PROTOCOL_TESTS_OUTPUT_DIR, PRIVATE_CLIENTS_DIR);
 
       if (!keepFiles) {
-        emptyDirSync(CODE_GEN_PROTOCOL_TESTS_OUTPUT_DIR);
         emptyDirSync(TEMP_CODE_GEN_INPUT_DIR);
         rmdirSync(TEMP_CODE_GEN_INPUT_DIR);
       }
@@ -70,37 +60,18 @@ const {
     }
 
     await generateClients(models || globs || DEFAULT_CODE_GEN_INPUT_DIR, batchSize);
-    if (!noPrivateClients) {
-      await generateGenericClient();
-      await generateProtocolTests();
-    }
 
     await codeOrdering(CODE_GEN_SDK_OUTPUT_DIR);
     await eslintFixCode();
     await prettifyCode(CODE_GEN_SDK_OUTPUT_DIR);
 
-    if (!noPrivateClients) {
-      await codeOrdering(CODE_GEN_GENERIC_CLIENT_OUTPUT_DIR);
-      await prettifyCode(CODE_GEN_GENERIC_CLIENT_OUTPUT_DIR);
-      await prettifyCode(CODE_GEN_PROTOCOL_TESTS_OUTPUT_DIR);
-    }
-
     await copyToClients(CODE_GEN_SDK_OUTPUT_DIR, clientsDir);
-    if (!noPrivateClients) {
-      await copyToClients(CODE_GEN_GENERIC_CLIENT_OUTPUT_DIR, PRIVATE_CLIENTS_DIR);
-      await copyToClients(CODE_GEN_PROTOCOL_TESTS_OUTPUT_DIR, PRIVATE_CLIENTS_DIR);
-      await copyServerTests(CODE_GEN_PROTOCOL_TESTS_OUTPUT_DIR, PRIVATE_CLIENTS_DIR);
-    }
 
     const compress = require("../endpoints-ruleset/compress");
     compress();
 
     if (!keepFiles) {
       emptyDirSync(CODE_GEN_SDK_OUTPUT_DIR);
-      if (!noPrivateClients) {
-        emptyDirSync(CODE_GEN_GENERIC_CLIENT_OUTPUT_DIR);
-        emptyDirSync(CODE_GEN_PROTOCOL_TESTS_OUTPUT_DIR);
-      }
       emptyDirSync(TEMP_CODE_GEN_INPUT_DIR);
       rmdirSync(TEMP_CODE_GEN_INPUT_DIR);
     }

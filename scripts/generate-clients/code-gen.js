@@ -77,13 +77,13 @@ const generateClients = async (models, batchSize) => {
   emptyDirSync(TEMP_CODE_GEN_SDK_OUTPUT_DIR);
 };
 
-const generateProtocolTests = async () => {
-  await spawnProcess("./gradlew", [":protocol-test-codegen:clean", ":protocol-test-codegen:build"], {
-    cwd: CODE_GEN_ROOT,
+const generateprotocoltests = async () => {
+  await spawnprocess("./gradlew", [":protocol-test-codegen:clean", ":protocol-test-codegen:build"], {
+    cwd: code_gen_root,
   });
 };
 
-const generateGenericClient = async () => {
+const generategenericclient = async () => {
   await spawnProcess("./gradlew", [":smithy-aws-typescript-codegen:clean", ":generic-client-test-codegen:build"], {
     cwd: CODE_GEN_ROOT,
   });
@@ -92,6 +92,4 @@ const generateGenericClient = async () => {
 module.exports = {
   generateClient,
   generateClients,
-  generateGenericClient,
-  generateProtocolTests,
 };
