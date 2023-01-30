@@ -1,0 +1,198 @@
+{
+  "version": "1.0",
+  "imports": ["model/"],
+  "projections": {
+    "awsAuthAndSigV4": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["aws.test#Service_awsAuthAndSigV4"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-codegen": {
+          "package": "@aws-sdk/aws-auth-and-sig-v4-service",
+          "packageVersion": "1.0.0-alpha.1",
+          "packageJson": {
+            "author": {
+              "name": "AWS SDK for JavaScript Team",
+              "url": "https://aws.amazon.com/javascript/"
+            },
+            "license": "Apache-2.0"
+          },
+          "private": true
+        }
+      }
+    },
+    "sigV4": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["aws.test#Service_sigV4"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-codegen": {
+          "package": "@aws-sdk/sig-v4-service",
+          "packageVersion": "1.0.0-alpha.1",
+          "packageJson": {
+            "author": {
+              "name": "AWS SDK for JavaScript Team",
+              "url": "https://aws.amazon.com/javascript/"
+            },
+            "license": "Apache-2.0"
+          },
+          "private": true
+        }
+      }
+    },
+    "httpBearerAuth": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["aws.test#Service_httpBearerAuth"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-codegen": {
+          "package": "@aws-sdk/http-bearer-auth-service",
+          "packageVersion": "1.0.0-alpha.1",
+          "packageJson": {
+            "author": {
+              "name": "AWS SDK for JavaScript Team",
+              "url": "https://aws.amazon.com/javascript/"
+            },
+            "license": "Apache-2.0"
+          },
+          "private": true
+        }
+      }
+    },
+    "sigV4AndHttpBearerAuth": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["aws.test#Service_sigV4AndHttpBearerAuth"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-codegen": {
+          "package": "@aws-sdk/sig-v4-and-http-bearer-auth-service",
+          "packageVersion": "1.0.0-alpha.1",
+          "packageJson": {
+            "author": {
+              "name": "AWS SDK for JavaScript Team",
+              "url": "https://aws.amazon.com/javascript/"
+            },
+            "license": "Apache-2.0"
+          },
+          "private": true
+        }
+      }
+    },
+    "httpApiKeyAuth": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["aws.test#Service_httpApiKeyAuth"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-codegen": {
+          "package": "@aws-sdk/http-api-key-auth-service",
+          "packageVersion": "1.0.0-alpha.1",
+          "packageJson": {
+            "author": {
+              "name": "AWS SDK for JavaScript Team",
+              "url": "https://aws.amazon.com/javascript/"
+            },
+            "license": "Apache-2.0"
+          },
+          "private": true
+        }
+      }
+    },
+    "httpApiKeyAuthWithScheme": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["aws.test#Service_httpApiKeyAuthWithScheme"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-codegen": {
+          "package": "@aws-sdk/http-api-key-auth-with-scheme-service",
+          "packageVersion": "1.0.0-alpha.1",
+          "packageJson": {
+            "author": {
+              "name": "AWS SDK for JavaScript Team",
+              "url": "https://aws.amazon.com/javascript/"
+            },
+            "license": "Apache-2.0"
+          },
+          "private": true
+        }
+      }
+    },
+    "httpBearerAuthAndHttpApiKeyAuth": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["aws.test#Service_httpBearerAuthAndHttpApiKeyAuth"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-codegen": {
+          "package": "@aws-sdk/http-bearer-auth-and-http-api-key-auth-service",
+          "packageVersion": "1.0.0-alpha.1",
+          "packageJson": {
+            "author": {
+              "name": "AWS SDK for JavaScript Team",
+              "url": "https://aws.amazon.com/javascript/"
+            },
+            "license": "Apache-2.0"
+          },
+          "private": true
+        }
+      }
+    },
+    "httpBearerAuthAndHttpApiKeyAuthAndAuth": {
+      "transforms": [
+        {
+          "name": "includeServices",
+          "args": {
+            "services": ["aws.test#Service_httpBearerAuthAndHttpApiKeyAuthAndAuth"]
+          }
+        }
+      ],
+      "plugins": {
+        "typescript-codegen": {
+          "package": "@aws-sdk/http-bearer-auth-and-http-api-key-auth-and-auth-service",
+          "packageVersion": "1.0.0-alpha.1",
+          "packageJson": {
+            "author": {
+              "name": "AWS SDK for JavaScript Team",
+              "url": "https://aws.amazon.com/javascript/"
+            },
+            "license": "Apache-2.0"
+          },
+          "private": true
+        }
+      }
+    }
+  }
+}
