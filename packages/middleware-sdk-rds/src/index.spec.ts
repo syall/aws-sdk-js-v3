@@ -8,7 +8,7 @@ const sourceIdentifier = "src-snapshot";
 
 const handler = crossRegionPresignedUrlMiddleware({
   region,
-  credentials,
+  identity: credentials,
   endpoint,
   sha256: MockSha256,
   signingEscapePath: true,

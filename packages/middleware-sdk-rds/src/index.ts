@@ -33,7 +33,7 @@ const sourceIdToCommandKeyMap: Record<string, string> = {
 const version = "2014-10-31";
 
 interface PreviouslyResolved {
-  credentials: MemoizedProvider<AwsCredentialIdentity>;
+  identity: MemoizedProvider<AwsCredentialIdentity>;
   endpoint?: Provider<Endpoint>;
   region: Provider<string>;
   sha256: ChecksumConstructor | HashConstructor;
@@ -85,7 +85,7 @@ export function crossRegionPresignedUrlMiddleware(options: PreviouslyResolved): 
           },
         });
         const signer = new SignatureV4({
-          credentials: options.credentials,
+          credentials: options.identity,
           region: sourceRegion,
           service: "rds",
           sha256: options.sha256,
