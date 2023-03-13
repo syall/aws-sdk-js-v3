@@ -12,6 +12,7 @@ export const getSignedUrl = async (
     service: options.service || "polly",
     uriEscapePath: options.uriEscapePath || false,
     ...client.config,
+    credentials: client.config.credentials ?? client.config.identity,
   });
 
   const presignInterceptMiddleware = (next: any, context: any) => async (args: any) => {
