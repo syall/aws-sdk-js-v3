@@ -22,7 +22,7 @@ import {
 import { formatUrl } from "@aws-sdk/util-format-url";
 
 interface PreviouslyResolved {
-  identity: MemoizedProvider<AwsCredentialIdentity>;
+  credentials: MemoizedProvider<AwsCredentialIdentity>;
   endpoint?: Provider<Endpoint>;
   region: Provider<string>;
   sha256: ChecksumConstructor | HashConstructor;
@@ -67,7 +67,7 @@ export function copySnapshotPresignedUrlMiddleware(options: PreviouslyResolved):
           },
         });
         const signer = new SignatureV4({
-          credentials: options.identity,
+          credentials: options.credentials,
           region: input.SourceRegion,
           service: "ec2",
           sha256: options.sha256,
