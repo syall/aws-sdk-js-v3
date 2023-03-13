@@ -5,7 +5,7 @@ export interface EndpointDiscoveryInputConfig {}
 
 export interface PreviouslyResolved {
   isCustomEndpoint?: boolean;
-  identity: MemoizedProvider<AwsCredentialIdentity>;
+  credentials: MemoizedProvider<AwsCredentialIdentity>;
   endpointDiscoveryEnabledProvider: Provider<boolean | undefined>;
 }
 

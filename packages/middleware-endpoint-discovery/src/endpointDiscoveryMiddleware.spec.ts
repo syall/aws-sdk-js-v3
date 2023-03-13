@@ -15,7 +15,7 @@ describe(endpointDiscoveryMiddleware.name, () => {
   const endpoint = "endpoint";
   const getEndpoint = jest.fn().mockReturnValue(endpoint);
   const mockConfig = {
-    identity: jest.fn(),
+    credentials: jest.fn(),
     endpointCache: {
       getEndpoint,
     } as unknown as EndpointCache,

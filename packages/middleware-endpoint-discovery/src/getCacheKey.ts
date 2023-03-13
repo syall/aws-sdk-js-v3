@@ -5,12 +5,12 @@ import { AwsCredentialIdentity, Provider } from "@aws-sdk/types";
  */
 export const getCacheKey = async (
   commandName: string,
-  config: { identity: Provider<AwsCredentialIdentity>; },
+  config: { credentials: Provider<AwsCredentialIdentity>; },
   options: {
     identifiers?: Record<string, string>;
   }
 ) => {
-  const { accessKeyId } = await config.identity();
+  const { accessKeyId } = await config.credentials();
   const { identifiers } = options;
   return JSON.stringify({
     ...(accessKeyId && { accessKeyId }),
