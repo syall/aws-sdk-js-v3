@@ -8,7 +8,7 @@ describe(resolveEndpointDiscoveryConfig.name, () => {
   const endpointDiscoveryCommandCtor = jest.fn();
   const mockInput = {
     isCustomEndpoint: false,
-    credentials: jest.fn(),
+    identity: jest.fn(),
     endpointDiscoveryEnabledProvider: jest.fn(),
   };
 

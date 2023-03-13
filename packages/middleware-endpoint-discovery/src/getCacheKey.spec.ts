@@ -8,7 +8,7 @@ describe(getCacheKey.name, () => {
   };
 
   const config = {
-    credentials: () => Promise.resolve(mockCredentials),
+    identity: () => Promise.resolve(mockCredentials),
   };
 
   it("returns accessKeyId in cacheKey", async () => {
