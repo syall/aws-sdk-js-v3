@@ -3,7 +3,7 @@ import { copySnapshotPresignedUrlMiddleware } from "./index";
 
 const nextHandler = jest.fn();
 const handler = copySnapshotPresignedUrlMiddleware({
-  credentials,
+  identity: credentials,
   endpoint,
   region,
   sha256: MockSha256,
