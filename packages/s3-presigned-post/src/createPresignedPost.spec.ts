@@ -57,7 +57,7 @@ const mockS3Client = {
     utf8Decoder: jest.fn().mockReturnValue(Buffer.from("mock_utf8_decoded")),
     sha256,
     region: async () => region,
-    identity: async () => credentials,
+    credentials: async () => credentials,
   },
 };
 

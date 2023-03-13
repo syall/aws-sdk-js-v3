@@ -52,7 +52,7 @@ export const createPresignedPost = async (
 
   // Prepare credentials.
   const credentialScope = createScope(shortDate, clientRegion, "s3");
-  const clientCredentials = await client.config.identity();
+  const clientCredentials = await client.config.credentials();
   const credential = `${clientCredentials.accessKeyId}/${credentialScope}`;
 
   const fields: Fields = {
