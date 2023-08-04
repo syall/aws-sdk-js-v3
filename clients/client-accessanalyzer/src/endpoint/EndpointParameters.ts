@@ -19,7 +19,7 @@ export const resolveClientEndpointParameters = <T>(
     ...options,
     useDualstackEndpoint: options.useDualstackEndpoint ?? false,
     useFipsEndpoint: options.useFipsEndpoint ?? false,
-    defaultSigningName: "access-analyzer",
+    defaultSigningName: "",
   };
 };
 

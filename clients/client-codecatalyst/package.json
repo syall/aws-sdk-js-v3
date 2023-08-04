@@ -24,7 +24,6 @@
     "@aws-sdk/middleware-host-header": "*",
     "@aws-sdk/middleware-logger": "*",
     "@aws-sdk/middleware-recursion-detection": "*",
-    "@aws-sdk/middleware-token": "*",
     "@aws-sdk/middleware-user-agent": "*",
     "@aws-sdk/types": "*",
     "@aws-sdk/util-endpoints": "*",

@@ -35,3 +35,5 @@ file(
             .filter { it.isDirectory }
             .forEach { includeBuild(it.absolutePath) }
     }
+
+includeBuild("../../smithy-typescript")

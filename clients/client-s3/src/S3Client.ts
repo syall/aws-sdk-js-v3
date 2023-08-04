@@ -705,6 +705,7 @@ export type S3ClientConfigType = Partial<__SmithyConfiguration<__HttpHandlerOpti
   UserAgentInputConfig &
   EventStreamSerdeInputConfig &
   ClientInputEndpointParameters;
+type S3Explicit = Omit<S3ClientConfigType, 'a'>
 /**
  * @public
  *

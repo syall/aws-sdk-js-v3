@@ -38,3 +38,5 @@ export {
   Step,
   Terminalware,
 } from "@smithy/types";
+
+export const AWS_SDK_INTERNAL = "AWS_SDK_INTERNAL";
