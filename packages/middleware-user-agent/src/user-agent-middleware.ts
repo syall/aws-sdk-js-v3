@@ -9,6 +9,7 @@ import {
   HandlerExecutionContext,
   MetadataBearer,
   Pluggable,
+  UserAgent,
   UserAgentPair,
 } from "@smithy/types";
 
@@ -24,6 +25,18 @@ import {
 } from "./constants";
 
 /**
+ * @internal
+ */
+export interface UserAgentMiddlewareHandlerExecutionContext {
+  /**
+   * Additional user agent that inferred by middleware. It can be used to save
+   * the internal user agent sections without overriding the `customUserAgent`
+   * config in clients.
+   */
+  userAgent?: UserAgent;
+}
+
+/**
  * Build user agent header sections from:
  * 1. runtime-specific default user agent provider;
  * 2. custom user agent from `customUserAgent` client config;
@@ -37,46 +50,46 @@ import {
  */
 export const userAgentMiddleware =
   (options: UserAgentResolvedConfig) =>
-  <Output extends MetadataBearer>(
-    next: BuildHandler<any, any>,
-    context: HandlerExecutionContext
-  ): BuildHandler<any, any> =>
-  async (args: BuildHandlerArguments<any>): Promise<BuildHandlerOutput<Output>> => {
-    const { request } = args;
-    if (!HttpRequest.isInstance(request)) return next(args);
-    const { headers } = request;
-    const userAgent = context?.userAgent?.map(escapeUserAgent) || [];
-    const defaultUserAgent = (await options.defaultUserAgentProvider()).map(escapeUserAgent);
-    const customUserAgent = options?.customUserAgent?.map(escapeUserAgent) || [];
-    const prefix = getUserAgentPrefix();
+    <Output extends MetadataBearer>(
+      next: BuildHandler<any, any>,
+      context: UserAgentMiddlewareHandlerExecutionContext
+    ): BuildHandler<any, any> =>
+      async (args: BuildHandlerArguments<any>): Promise<BuildHandlerOutput<Output>> => {
+        const { request } = args;
+        if (!HttpRequest.isInstance(request)) return next(args);
+        const { headers } = request;
+        const userAgent = context?.userAgent?.map(escapeUserAgent) || [];
+        const defaultUserAgent = (await options.defaultUserAgentProvider()).map(escapeUserAgent);
+        const customUserAgent = options?.customUserAgent?.map(escapeUserAgent) || [];
+        const prefix = getUserAgentPrefix();
 
-    // Set value to AWS-specific user agent header
-    const sdkUserAgentValue = (prefix ? [prefix] : [])
-      .concat([...defaultUserAgent, ...userAgent, ...customUserAgent])
-      .join(SPACE);
+        // Set value to AWS-specific user agent header
+        const sdkUserAgentValue = (prefix ? [prefix] : [])
+          .concat([...defaultUserAgent, ...userAgent, ...customUserAgent])
+          .join(SPACE);
 
-    // Get value to be sent with non-AWS-specific user agent header.
-    const normalUAValue = [
-      ...defaultUserAgent.filter((section) => section.startsWith("aws-sdk-")),
-      ...customUserAgent,
-    ].join(SPACE);
+        // Get value to be sent with non-AWS-specific user agent header.
+        const normalUAValue = [
+          ...defaultUserAgent.filter((section) => section.startsWith("aws-sdk-")),
+          ...customUserAgent,
+        ].join(SPACE);
 
-    if (options.runtime !== "browser") {
-      if (normalUAValue) {
-        headers[X_AMZ_USER_AGENT] = headers[X_AMZ_USER_AGENT]
-          ? `${headers[USER_AGENT]} ${normalUAValue}`
-          : normalUAValue;
-      }
-      headers[USER_AGENT] = sdkUserAgentValue;
-    } else {
-      headers[X_AMZ_USER_AGENT] = sdkUserAgentValue;
-    }
+        if (options.runtime !== "browser") {
+          if (normalUAValue) {
+            headers[X_AMZ_USER_AGENT] = headers[X_AMZ_USER_AGENT]
+              ? `${headers[USER_AGENT]} ${normalUAValue}`
+              : normalUAValue;
+          }
+          headers[USER_AGENT] = sdkUserAgentValue;
+        } else {
+          headers[X_AMZ_USER_AGENT] = sdkUserAgentValue;
+        }
 
-    return next({
-      ...args,
-      request,
-    });
-  };
+        return next({
+          ...args,
+          request,
+        });
+      };
 
 /**
  * Escape the each pair according to https://tools.ietf.org/html/rfc5234 and join the pair with pattern `name/version`.

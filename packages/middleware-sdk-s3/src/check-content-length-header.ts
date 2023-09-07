@@ -6,11 +6,20 @@ import {
   FinalizeRequestHandlerOptions,
   FinalizeRequestMiddleware,
   HandlerExecutionContext,
+  Logger,
   MetadataBearer,
   Pluggable,
 } from "@smithy/types";
 
 const CONTENT_LENGTH_HEADER = "content-length";
+
+export interface CheckContentLengthHeaderHandlerExecutionContext {
+  /**
+   * A logger that may be invoked by any handler during execution of an
+   * operation.
+   */
+  logger?: Logger;
+}
 
 /**
  * @internal
@@ -20,9 +29,9 @@ const CONTENT_LENGTH_HEADER = "content-length";
  */
 export function checkContentLengthHeader(): FinalizeRequestMiddleware<any, any> {
   return <Output extends MetadataBearer>(
-      next: FinalizeHandler<any, Output>,
-      context: HandlerExecutionContext
-    ): FinalizeHandler<any, Output> =>
+    next: FinalizeHandler<any, Output>,
+    context: CheckContentLengthHeaderHandlerExecutionContext
+  ): FinalizeHandler<any, Output> =>
     async (args: FinalizeHandlerArguments<any>): Promise<FinalizeHandlerOutput<Output>> => {
       const { request } = args;
 
