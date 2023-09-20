@@ -2,15 +2,14 @@
 // @ts-ignore: package.json will be imported from dist folders
 import packageInfo from "../package.json"; // eslint-disable-line
 
-import { decorateDefaultCredentialProvider } from "./defaultStsRoleAssumers";
+import { decorateDefaultCredentialProvider } from "@aws-sdk/client-sts";
 import { defaultProvider as credentialDefaultProvider } from "@aws-sdk/credential-provider-node";
 import { defaultUserAgent } from "@aws-sdk/util-user-agent-node";
 import {
-  NODE_REGION_CONFIG_FILE_OPTIONS,
-  NODE_REGION_CONFIG_OPTIONS,
   NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS,
   NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS,
 } from "@smithy/config-resolver";
+import { IdentityProviderConfig, SigV4Signer } from "@smithy/experimental-identity-and-auth";
 import { Hash } from "@smithy/hash-node";
 import { NODE_MAX_ATTEMPT_CONFIG_OPTIONS, NODE_RETRY_MODE_CONFIG_OPTIONS } from "@smithy/middleware-retry";
 import { loadConfig as loadNodeConfig } from "@smithy/node-config-provider";
@@ -37,13 +36,18 @@ export const getRuntimeConfig = (config: STSClientConfig) => {
     runtime: "node",
     defaultsMode,
     bodyLengthChecker: config?.bodyLengthChecker ?? calculateBodyLength,
-    credentialDefaultProvider:
-      config?.credentialDefaultProvider ?? decorateDefaultCredentialProvider(credentialDefaultProvider),
     defaultUserAgentProvider:
       config?.defaultUserAgentProvider ??
       defaultUserAgent({ serviceId: clientSharedValues.serviceId, clientVersion: packageInfo.version }),
+    httpAuthSchemes: config?.httpAuthSchemes ?? [
+      {
+        schemeId: "aws.auth#sigv4",
+        identityProvider: (config: IdentityProviderConfig) =>
+          config.getIdentityProvider("aws.auth#sigv4") || decorateDefaultCredentialProvider(credentialDefaultProvider),
+        signer: new SigV4Signer(),
+      },
+    ],
     maxAttempts: config?.maxAttempts ?? loadNodeConfig(NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
-    region: config?.region ?? loadNodeConfig(NODE_REGION_CONFIG_OPTIONS, NODE_REGION_CONFIG_FILE_OPTIONS),
     requestHandler: config?.requestHandler ?? new RequestHandler(defaultConfigProvider),
     retryMode:
       config?.retryMode ??

@@ -1,11 +1,12 @@
 // smithy-typescript generated code
-import { SignatureV4MultiRegion } from "@aws-sdk/signature-v4-multi-region";
+import { IdentityProviderConfig, SigV4Signer } from "@smithy/experimental-identity-and-auth";
 import { NoOpLogger } from "@smithy/smithy-client";
 import { parseUrl } from "@smithy/url-parser";
 import { fromBase64, toBase64 } from "@smithy/util-base64";
 import { getAwsChunkedEncodingStream, sdkStreamMixin } from "@smithy/util-stream";
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
+import { defaultEndpointRuleSetHttpAuthSchemeProvider } from "./auth/httpAuthSchemeProvider";
 import { defaultEndpointResolver } from "./endpoint/endpointResolver";
 import { S3ClientConfig } from "./S3Client";
 
@@ -20,13 +21,23 @@ export const getRuntimeConfig = (config: S3ClientConfig) => ({
   endpointProvider: config?.endpointProvider ?? defaultEndpointResolver,
   extensions: config?.extensions ?? [],
   getAwsChunkedEncodingStream: config?.getAwsChunkedEncodingStream ?? getAwsChunkedEncodingStream,
+  httpAuthSchemeProvider: config?.httpAuthSchemeProvider ?? defaultEndpointRuleSetHttpAuthSchemeProvider,
+  httpAuthSchemes: config?.httpAuthSchemes ?? [
+    {
+      schemeId: "aws.auth#sigv4",
+      identityProvider: (config: IdentityProviderConfig) => config.getIdentityProvider("aws.auth#sigv4"),
+      signer: new SigV4Signer(),
+    },
+    {
+      schemeId: "aws.auth#sigv4a",
+      identityProvider: (config: IdentityProviderConfig) => config.getIdentityProvider("aws.auth#sigv4a"),
+      signer: new SigV4Signer(),
+    },
+  ],
   logger: config?.logger ?? new NoOpLogger(),
   sdkStreamMixin: config?.sdkStreamMixin ?? sdkStreamMixin,
   serviceId: config?.serviceId ?? "S3",
-  signerConstructor: config?.signerConstructor ?? SignatureV4MultiRegion,
-  signingEscapePath: config?.signingEscapePath ?? false,
   urlParser: config?.urlParser ?? parseUrl,
-  useArnRegion: config?.useArnRegion ?? false,
   utf8Decoder: config?.utf8Decoder ?? fromUtf8,
   utf8Encoder: config?.utf8Encoder ?? toUtf8,
 });

@@ -7,14 +7,13 @@ import {
 } from "@aws-sdk/middleware-host-header";
 import { getLoggerPlugin } from "@aws-sdk/middleware-logger";
 import { getRecursionDetectionPlugin } from "@aws-sdk/middleware-recursion-detection";
-import { getTokenPlugin, resolveTokenConfig, TokenInputConfig, TokenResolvedConfig } from "@aws-sdk/middleware-token";
 import {
   getUserAgentPlugin,
   resolveUserAgentConfig,
   UserAgentInputConfig,
   UserAgentResolvedConfig,
 } from "@aws-sdk/middleware-user-agent";
-import { RegionInputConfig, RegionResolvedConfig, resolveRegionConfig } from "@smithy/config-resolver";
+import { getHttpAuthSchemePlugin, getHttpSigningPlugin, HttpAuthScheme } from "@smithy/experimental-identity-and-auth";
 import { getContentLengthPlugin } from "@smithy/middleware-content-length";
 import { EndpointInputConfig, EndpointResolvedConfig, resolveEndpointConfig } from "@smithy/middleware-endpoint";
 import { getRetryPlugin, resolveRetryConfig, RetryInputConfig, RetryResolvedConfig } from "@smithy/middleware-retry";
@@ -44,6 +43,12 @@ import {
   UserAgent as __UserAgent,
 } from "@smithy/types";
 
+import {
+  CodeCatalystHttpAuthSchemeProvider,
+  HttpAuthSchemeInputConfig,
+  HttpAuthSchemeResolvedConfig,
+  resolveHttpAuthSchemeConfig,
+} from "./auth/httpAuthSchemeProvider";
 import { CreateAccessTokenCommandInput, CreateAccessTokenCommandOutput } from "./commands/CreateAccessTokenCommand";
 import {
   CreateDevEnvironmentCommandInput,
@@ -325,6 +330,18 @@ export interface ClientDefaults extends Partial<__SmithyResolvedConfiguration<__
    * The {@link @smithy/smithy-client#DefaultsMode} that will be used to determine how certain default configuration options are resolved in the SDK.
    */
   defaultsMode?: __DefaultsMode | __Provider<__DefaultsMode>;
+
+  /**
+   * experimentalIdentityAndAuth: Configuration of HttpAuthSchemes for a client which provides default identity providers and signers per auth scheme.
+   * @internal
+   */
+  httpAuthSchemes?: HttpAuthScheme[];
+
+  /**
+   * experimentalIdentityAndAuth: Configuration of an HttpAuthSchemeProvider for a client which resolves which HttpAuthScheme to use.
+   * @internal
+   */
+  httpAuthSchemeProvider?: CodeCatalystHttpAuthSchemeProvider;
 }
 
 /**
@@ -332,12 +349,11 @@ export interface ClientDefaults extends Partial<__SmithyResolvedConfiguration<__
  */
 export type CodeCatalystClientConfigType = Partial<__SmithyConfiguration<__HttpHandlerOptions>> &
   ClientDefaults &
-  RegionInputConfig &
   EndpointInputConfig<EndpointParameters> &
   RetryInputConfig &
   HostHeaderInputConfig &
-  TokenInputConfig &
   UserAgentInputConfig &
+  HttpAuthSchemeInputConfig &
   ClientInputEndpointParameters;
 /**
  * @public
@@ -352,12 +368,11 @@ export interface CodeCatalystClientConfig extends CodeCatalystClientConfigType {
 export type CodeCatalystClientResolvedConfigType = __SmithyResolvedConfiguration<__HttpHandlerOptions> &
   Required<ClientDefaults> &
   RuntimeExtensionsConfig &
-  RegionResolvedConfig &
   EndpointResolvedConfig<EndpointParameters> &
   RetryResolvedConfig &
   HostHeaderResolvedConfig &
-  TokenResolvedConfig &
   UserAgentResolvedConfig &
+  HttpAuthSchemeResolvedConfig &
   ClientResolvedEndpointParameters;
 /**
  * @public
@@ -535,22 +550,22 @@ export class CodeCatalystClient extends __Client<
   constructor(...[configuration]: __CheckOptionalClientConfig<CodeCatalystClientConfig>) {
     const _config_0 = __getRuntimeConfig(configuration || {});
     const _config_1 = resolveClientEndpointParameters(_config_0);
-    const _config_2 = resolveRegionConfig(_config_1);
-    const _config_3 = resolveEndpointConfig(_config_2);
-    const _config_4 = resolveRetryConfig(_config_3);
-    const _config_5 = resolveHostHeaderConfig(_config_4);
-    const _config_6 = resolveTokenConfig(_config_5);
-    const _config_7 = resolveUserAgentConfig(_config_6);
-    const _config_8 = resolveRuntimeExtensions(_config_7, configuration?.extensions || []);
-    super(_config_8);
-    this.config = _config_8;
+    const _config_2 = resolveEndpointConfig(_config_1);
+    const _config_3 = resolveRetryConfig(_config_2);
+    const _config_4 = resolveHostHeaderConfig(_config_3);
+    const _config_5 = resolveUserAgentConfig(_config_4);
+    const _config_6 = resolveHttpAuthSchemeConfig(_config_5);
+    const _config_7 = resolveRuntimeExtensions(_config_6, configuration?.extensions || []);
+    super(_config_7);
+    this.config = _config_7;
     this.middlewareStack.use(getRetryPlugin(this.config));
     this.middlewareStack.use(getContentLengthPlugin(this.config));
     this.middlewareStack.use(getHostHeaderPlugin(this.config));
     this.middlewareStack.use(getLoggerPlugin(this.config));
     this.middlewareStack.use(getRecursionDetectionPlugin(this.config));
-    this.middlewareStack.use(getTokenPlugin(this.config));
     this.middlewareStack.use(getUserAgentPlugin(this.config));
+    this.middlewareStack.use(getHttpAuthSchemePlugin(this.config));
+    this.middlewareStack.use(getHttpSigningPlugin(this.config));
   }
 
   /**

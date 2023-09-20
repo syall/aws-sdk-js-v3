@@ -24,7 +24,7 @@ export const resolveClientEndpointParameters = <T>(
     useDualstackEndpoint: options.useDualstackEndpoint ?? false,
     useFipsEndpoint: options.useFipsEndpoint ?? false,
     useGlobalEndpoint: options.useGlobalEndpoint ?? false,
-    defaultSigningName: "sts",
+    defaultSigningName: "",
   };
 };
 

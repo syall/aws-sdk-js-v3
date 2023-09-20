@@ -20,7 +20,7 @@ export const resolveClientEndpointParameters = <T>(
   return {
     ...options,
     useFipsEndpoint: options.useFipsEndpoint ?? false,
-    defaultSigningName: "codecatalyst",
+    defaultSigningName: "",
   };
 };
 

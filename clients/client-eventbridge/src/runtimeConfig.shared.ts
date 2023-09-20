@@ -1,10 +1,11 @@
 // smithy-typescript generated code
-import { SignatureV4MultiRegion } from "@aws-sdk/signature-v4-multi-region";
+import { IdentityProviderConfig, SigV4Signer } from "@smithy/experimental-identity-and-auth";
 import { NoOpLogger } from "@smithy/smithy-client";
 import { parseUrl } from "@smithy/url-parser";
 import { fromBase64, toBase64 } from "@smithy/util-base64";
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
+import { defaultEndpointRuleSetHttpAuthSchemeProvider } from "./auth/httpAuthSchemeProvider";
 import { defaultEndpointResolver } from "./endpoint/endpointResolver";
 import { EventBridgeClientConfig } from "./EventBridgeClient";
 
@@ -18,9 +19,21 @@ export const getRuntimeConfig = (config: EventBridgeClientConfig) => ({
   disableHostPrefix: config?.disableHostPrefix ?? false,
   endpointProvider: config?.endpointProvider ?? defaultEndpointResolver,
   extensions: config?.extensions ?? [],
+  httpAuthSchemeProvider: config?.httpAuthSchemeProvider ?? defaultEndpointRuleSetHttpAuthSchemeProvider,
+  httpAuthSchemes: config?.httpAuthSchemes ?? [
+    {
+      schemeId: "aws.auth#sigv4",
+      identityProvider: (config: IdentityProviderConfig) => config.getIdentityProvider("aws.auth#sigv4"),
+      signer: new SigV4Signer(),
+    },
+    {
+      schemeId: "aws.auth#sigv4a",
+      identityProvider: (config: IdentityProviderConfig) => config.getIdentityProvider("aws.auth#sigv4a"),
+      signer: new SigV4Signer(),
+    },
+  ],
   logger: config?.logger ?? new NoOpLogger(),
   serviceId: config?.serviceId ?? "EventBridge",
-  signerConstructor: config?.signerConstructor ?? SignatureV4MultiRegion,
   urlParser: config?.urlParser ?? parseUrl,
   utf8Decoder: config?.utf8Decoder ?? fromUtf8,
   utf8Encoder: config?.utf8Encoder ?? toUtf8,

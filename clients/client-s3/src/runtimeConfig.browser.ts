@@ -7,9 +7,9 @@ import { Sha256 } from "@aws-crypto/sha256-browser";
 import { defaultUserAgent } from "@aws-sdk/util-user-agent-browser";
 import { DEFAULT_USE_DUALSTACK_ENDPOINT, DEFAULT_USE_FIPS_ENDPOINT } from "@smithy/config-resolver";
 import { eventStreamSerdeProvider } from "@smithy/eventstream-serde-browser";
+import { IdentityProviderConfig, SigV4Signer } from "@smithy/experimental-identity-and-auth";
 import { FetchHttpHandler as RequestHandler, streamCollector } from "@smithy/fetch-http-handler";
 import { blobHasher as streamHasher } from "@smithy/hash-blob-browser";
-import { invalidProvider } from "@smithy/invalid-dependency";
 import { Md5 } from "@smithy/md5-js";
 import { calculateBodyLength } from "@smithy/util-body-length-browser";
 import { DEFAULT_MAX_ATTEMPTS, DEFAULT_RETRY_MODE } from "@smithy/util-retry";
@@ -31,15 +31,32 @@ export const getRuntimeConfig = (config: S3ClientConfig) => {
     runtime: "browser",
     defaultsMode,
     bodyLengthChecker: config?.bodyLengthChecker ?? calculateBodyLength,
-    credentialDefaultProvider:
-      config?.credentialDefaultProvider ?? ((_: unknown) => () => Promise.reject(new Error("Credential is missing"))),
     defaultUserAgentProvider:
       config?.defaultUserAgentProvider ??
       defaultUserAgent({ serviceId: clientSharedValues.serviceId, clientVersion: packageInfo.version }),
     eventStreamSerdeProvider: config?.eventStreamSerdeProvider ?? eventStreamSerdeProvider,
+    httpAuthSchemes: config?.httpAuthSchemes ?? [
+      {
+        schemeId: "aws.auth#sigv4",
+        identityProvider: (config: IdentityProviderConfig) =>
+          config.getIdentityProvider("aws.auth#sigv4") ||
+          (async () => {
+            throw new Error("`credentials` is missing");
+          }),
+        signer: new SigV4Signer(),
+      },
+      {
+        schemeId: "aws.auth#sigv4a",
+        identityProvider: (config: IdentityProviderConfig) =>
+          config.getIdentityProvider("aws.auth#sigv4a") ||
+          (async () => {
+            throw new Error("`credentials` is missing");
+          }),
+        signer: new SigV4Signer(),
+      },
+    ],
     maxAttempts: config?.maxAttempts ?? DEFAULT_MAX_ATTEMPTS,
     md5: config?.md5 ?? Md5,
-    region: config?.region ?? invalidProvider("Region is missing"),
     requestHandler: config?.requestHandler ?? new RequestHandler(defaultConfigProvider),
     retryMode: config?.retryMode ?? (async () => (await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE),
     sha1: config?.sha1 ?? Sha1,
