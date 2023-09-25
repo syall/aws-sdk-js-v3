@@ -5,8 +5,8 @@ import packageInfo from "../package.json"; // eslint-disable-line
 import { Sha256 } from "@aws-crypto/sha256-browser";
 import { defaultUserAgent } from "@aws-sdk/util-user-agent-browser";
 import { DEFAULT_USE_DUALSTACK_ENDPOINT, DEFAULT_USE_FIPS_ENDPOINT } from "@smithy/config-resolver";
+import { IdentityProviderConfig, SigV4Signer } from "@smithy/experimental-identity-and-auth";
 import { FetchHttpHandler as RequestHandler, streamCollector } from "@smithy/fetch-http-handler";
-import { invalidProvider } from "@smithy/invalid-dependency";
 import { calculateBodyLength } from "@smithy/util-body-length-browser";
 import { DEFAULT_MAX_ATTEMPTS, DEFAULT_RETRY_MODE } from "@smithy/util-retry";
 import { EventBridgeClientConfig } from "./EventBridgeClient";
@@ -27,13 +27,21 @@ export const getRuntimeConfig = (config: EventBridgeClientConfig) => {
     runtime: "browser",
     defaultsMode,
     bodyLengthChecker: config?.bodyLengthChecker ?? calculateBodyLength,
-    credentialDefaultProvider:
-      config?.credentialDefaultProvider ?? ((_: unknown) => () => Promise.reject(new Error("Credential is missing"))),
     defaultUserAgentProvider:
       config?.defaultUserAgentProvider ??
       defaultUserAgent({ serviceId: clientSharedValues.serviceId, clientVersion: packageInfo.version }),
+    httpAuthSchemes: config?.httpAuthSchemes ?? [
+      {
+        schemeId: "aws.auth#sigv4",
+        identityProvider: (config: IdentityProviderConfig) =>
+          config.getIdentityProvider("aws.auth#sigv4") ||
+          (async () => {
+            throw new Error("`credentials` is missing");
+          }),
+        signer: new SigV4Signer(),
+      },
+    ],
     maxAttempts: config?.maxAttempts ?? DEFAULT_MAX_ATTEMPTS,
-    region: config?.region ?? invalidProvider("Region is missing"),
     requestHandler: config?.requestHandler ?? new RequestHandler(defaultConfigProvider),
     retryMode: config?.retryMode ?? (async () => (await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE),
     sha256: config?.sha256 ?? Sha256,
