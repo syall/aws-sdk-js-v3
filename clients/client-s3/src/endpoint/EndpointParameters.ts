@@ -31,7 +31,7 @@ export const resolveClientEndpointParameters = <T>(
     useAccelerateEndpoint: options.useAccelerateEndpoint ?? false,
     useGlobalEndpoint: options.useGlobalEndpoint ?? false,
     disableMultiregionAccessPoints: options.disableMultiregionAccessPoints ?? false,
-    defaultSigningName: "s3",
+    defaultSigningName: "",
   };
 };
 
