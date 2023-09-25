@@ -444,6 +444,9 @@ export class CopyObjectCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AmazonS3",
         operation: "CopyObject",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: CopyObjectCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

@@ -6,7 +6,7 @@ import { fromBase64, toBase64 } from "@smithy/util-base64";
 import { getAwsChunkedEncodingStream, sdkStreamMixin } from "@smithy/util-stream";
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
-import { defaultAmazonS3HttpAuthSchemeProvider } from "./auth/httpAuthSchemeProvider";
+import { defaultEndpointRuleSetHttpAuthSchemeProvider } from "./auth/httpAuthSchemeProvider";
 import { defaultEndpointResolver } from "./endpoint/endpointResolver";
 import { S3ClientConfig } from "./S3Client";
 
@@ -21,11 +21,16 @@ export const getRuntimeConfig = (config: S3ClientConfig) => ({
   endpointProvider: config?.endpointProvider ?? defaultEndpointResolver,
   extensions: config?.extensions ?? [],
   getAwsChunkedEncodingStream: config?.getAwsChunkedEncodingStream ?? getAwsChunkedEncodingStream,
-  httpAuthSchemeProvider: config?.httpAuthSchemeProvider ?? defaultAmazonS3HttpAuthSchemeProvider,
+  httpAuthSchemeProvider: config?.httpAuthSchemeProvider ?? defaultEndpointRuleSetHttpAuthSchemeProvider,
   httpAuthSchemes: config?.httpAuthSchemes ?? [
     {
       schemeId: "aws.auth#sigv4",
       identityProvider: (config: IdentityProviderConfig) => config.getIdentityProvider("aws.auth#sigv4"),
+      signer: new SigV4Signer(),
+    },
+    {
+      schemeId: "aws.auth#sigv4a",
+      identityProvider: (config: IdentityProviderConfig) => config.getIdentityProvider("aws.auth#sigv4a"),
       signer: new SigV4Signer(),
     },
   ],

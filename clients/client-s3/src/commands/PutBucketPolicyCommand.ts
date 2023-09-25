@@ -178,6 +178,9 @@ export class PutBucketPolicyCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AmazonS3",
         operation: "PutBucketPolicy",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: PutBucketPolicyCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

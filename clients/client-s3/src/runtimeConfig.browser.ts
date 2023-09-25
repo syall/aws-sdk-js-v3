@@ -45,6 +45,15 @@ export const getRuntimeConfig = (config: S3ClientConfig) => {
           }),
         signer: new SigV4Signer(),
       },
+      {
+        schemeId: "aws.auth#sigv4a",
+        identityProvider: (config: IdentityProviderConfig) =>
+          config.getIdentityProvider("aws.auth#sigv4a") ||
+          (async () => {
+            throw new Error("`credentials` is missing");
+          }),
+        signer: new SigV4Signer(),
+      },
     ],
     maxAttempts: config?.maxAttempts ?? DEFAULT_MAX_ATTEMPTS,
     md5: config?.md5 ?? Md5,

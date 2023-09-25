@@ -172,6 +172,9 @@ export class GetBucketPolicyCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AmazonS3",
         operation: "GetBucketPolicy",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: GetBucketPolicyCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

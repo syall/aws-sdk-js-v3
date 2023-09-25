@@ -155,6 +155,9 @@ export class HeadBucketCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AmazonS3",
         operation: "HeadBucket",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: HeadBucketCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

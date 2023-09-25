@@ -1,5 +1,7 @@
 // smithy-typescript generated code
 import {
+  createEndpointRuleSetHttpAuthSchemeParametersProvider,
+  createEndpointRuleSetHttpAuthSchemeProvider,
   DefaultIdentityProviderConfig,
   doesIdentityRequireRefresh,
   HttpAuthOption,
@@ -13,6 +15,8 @@ import {
 import { AwsCredentialIdentity, AwsCredentialIdentityProvider, Provider as __Provider } from "@smithy/types";
 import { getSmithyContext, normalizeProvider } from "@smithy/util-middleware";
 
+import { EndpointParameters } from "../endpoint/EndpointParameters";
+import { defaultEndpointResolver } from "../endpoint/endpointResolver";
 import { S3ClientResolvedConfig } from "../S3Client";
 
 /**
@@ -49,6 +53,16 @@ export const defaultS3HttpAuthSchemeParametersProvider: S3HttpAuthSchemeParamete
 function createAwsAuthSigv4HttpAuthOption(authParameters: S3HttpAuthSchemeParameters): HttpAuthOption {
   return {
     schemeId: "aws.auth#sigv4",
+    signingProperties: {
+      name: "s3",
+      region: authParameters.region,
+    },
+  };
+}
+
+function createAwsAuthSigv4aHttpAuthOption(authParameters: S3HttpAuthSchemeParameters): HttpAuthOption {
+  return {
+    schemeId: "aws.auth#sigv4a",
     signingProperties: {
       name: "s3",
       region: authParameters.region,
@@ -122,9 +136,38 @@ export const resolveHttpAuthSchemeConfig = (config: HttpAuthSchemeInputConfig): 
     ...config,
     credentials,
     region,
-    httpAuthSchemeParametersProvider: defaultS3HttpAuthSchemeParametersProvider,
+    httpAuthSchemeParametersProvider: defaultEndpointRuleSetHttpAuthSchemeParametersProvider,
     identityProviderConfig: new DefaultIdentityProviderConfig({
       "aws.auth#sigv4": credentials,
     }),
   };
 };
+
+/**
+ * @internal
+ */
+export interface S3EndpointRuleSetHttpAuthSchemeParameters extends EndpointParameters, S3HttpAuthSchemeParameters {}
+
+/**
+ * @internal
+ */
+export interface S3EndpointRuleSetHttpAuthSchemeParametersProvider
+  extends HttpAuthSchemeParametersProvider<S3ClientResolvedConfig, S3EndpointRuleSetHttpAuthSchemeParameters> {}
+
+/**
+ * @internal
+ */
+export const defaultEndpointRuleSetHttpAuthSchemeParametersProvider: S3EndpointRuleSetHttpAuthSchemeParametersProvider =
+  createEndpointRuleSetHttpAuthSchemeParametersProvider(defaultS3HttpAuthSchemeParametersProvider);
+
+/**
+ * @internal
+ */
+export interface S3EndpointRuleSetHttpAuthSchemeProvider
+  extends HttpAuthSchemeProvider<S3EndpointRuleSetHttpAuthSchemeParameters> {}
+
+/**
+ * @internal
+ */
+export const defaultEndpointRuleSetHttpAuthSchemeProvider: S3EndpointRuleSetHttpAuthSchemeProvider =
+  createEndpointRuleSetHttpAuthSchemeProvider(defaultEndpointResolver, defaultS3HttpAuthSchemeProvider);

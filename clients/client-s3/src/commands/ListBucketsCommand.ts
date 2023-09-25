@@ -162,6 +162,9 @@ export class ListBucketsCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AmazonS3",
         operation: "ListBuckets",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: ListBucketsCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

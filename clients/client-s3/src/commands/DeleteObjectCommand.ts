@@ -179,6 +179,9 @@ export class DeleteObjectCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AmazonS3",
         operation: "DeleteObject",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: DeleteObjectCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

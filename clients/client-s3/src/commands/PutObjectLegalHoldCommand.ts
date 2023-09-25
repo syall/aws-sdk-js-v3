@@ -144,6 +144,9 @@ export class PutObjectLegalHoldCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AmazonS3",
         operation: "PutObjectLegalHold",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: PutObjectLegalHoldCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;
