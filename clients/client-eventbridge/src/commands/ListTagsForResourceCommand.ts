@@ -130,6 +130,9 @@ export class ListTagsForResourceCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AWSEvents",
         operation: "ListTagsForResource",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: ListTagsForResourceCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

@@ -125,6 +125,9 @@ export class DeleteApiDestinationCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AWSEvents",
         operation: "DeleteApiDestination",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: DeleteApiDestinationCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

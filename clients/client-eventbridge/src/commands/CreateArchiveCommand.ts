@@ -146,6 +146,9 @@ export class CreateArchiveCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AWSEvents",
         operation: "CreateArchive",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: CreateArchiveCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

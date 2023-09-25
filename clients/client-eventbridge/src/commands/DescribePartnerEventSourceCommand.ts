@@ -131,6 +131,9 @@ export class DescribePartnerEventSourceCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AWSEvents",
         operation: "DescribePartnerEventSource",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: DescribePartnerEventSourceCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

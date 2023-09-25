@@ -135,6 +135,9 @@ export class DeactivateEventSourceCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AWSEvents",
         operation: "DeactivateEventSource",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: DeactivateEventSourceCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

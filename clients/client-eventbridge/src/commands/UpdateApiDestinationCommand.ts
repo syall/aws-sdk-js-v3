@@ -139,6 +139,9 @@ export class UpdateApiDestinationCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AWSEvents",
         operation: "UpdateApiDestination",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: UpdateApiDestinationCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

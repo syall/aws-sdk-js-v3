@@ -447,6 +447,9 @@ export class PutTargetsCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AWSEvents",
         operation: "PutTargets",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: PutTargetsCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

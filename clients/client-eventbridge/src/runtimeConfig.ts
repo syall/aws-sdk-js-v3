@@ -46,6 +46,12 @@ export const getRuntimeConfig = (config: EventBridgeClientConfig) => {
           config.getIdentityProvider("aws.auth#sigv4") || decorateDefaultCredentialProvider(credentialDefaultProvider),
         signer: new SigV4Signer(),
       },
+      {
+        schemeId: "aws.auth#sigv4a",
+        identityProvider: (config: IdentityProviderConfig) =>
+          config.getIdentityProvider("aws.auth#sigv4a") || decorateDefaultCredentialProvider(credentialDefaultProvider),
+        signer: new SigV4Signer(),
+      },
     ],
     maxAttempts: config?.maxAttempts ?? loadNodeConfig(NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
     requestHandler: config?.requestHandler ?? new RequestHandler(defaultConfigProvider),

@@ -149,6 +149,9 @@ export class CreateEventBusCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AWSEvents",
         operation: "CreateEventBus",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: CreateEventBusCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

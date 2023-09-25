@@ -191,6 +191,9 @@ export class PutRuleCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AWSEvents",
         operation: "PutRule",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: PutRuleCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

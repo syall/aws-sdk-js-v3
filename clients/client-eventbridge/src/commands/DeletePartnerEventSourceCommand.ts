@@ -130,6 +130,9 @@ export class DeletePartnerEventSourceCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AWSEvents",
         operation: "DeletePartnerEventSource",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: DeletePartnerEventSourceCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

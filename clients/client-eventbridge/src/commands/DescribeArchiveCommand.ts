@@ -137,6 +137,9 @@ export class DescribeArchiveCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AWSEvents",
         operation: "DescribeArchive",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: DescribeArchiveCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

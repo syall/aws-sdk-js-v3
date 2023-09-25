@@ -135,6 +135,9 @@ export class DisableRuleCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AWSEvents",
         operation: "DisableRule",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: DisableRuleCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

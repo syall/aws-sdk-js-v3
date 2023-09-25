@@ -40,6 +40,15 @@ export const getRuntimeConfig = (config: EventBridgeClientConfig) => {
           }),
         signer: new SigV4Signer(),
       },
+      {
+        schemeId: "aws.auth#sigv4a",
+        identityProvider: (config: IdentityProviderConfig) =>
+          config.getIdentityProvider("aws.auth#sigv4a") ||
+          (async () => {
+            throw new Error("`credentials` is missing");
+          }),
+        signer: new SigV4Signer(),
+      },
     ],
     maxAttempts: config?.maxAttempts ?? DEFAULT_MAX_ATTEMPTS,
     requestHandler: config?.requestHandler ?? new RequestHandler(defaultConfigProvider),

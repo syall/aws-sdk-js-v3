@@ -131,6 +131,9 @@ export class DeleteConnectionCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AWSEvents",
         operation: "DeleteConnection",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: DeleteConnectionCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

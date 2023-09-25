@@ -143,6 +143,9 @@ export class DeleteRuleCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AWSEvents",
         operation: "DeleteRule",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: DeleteRuleCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

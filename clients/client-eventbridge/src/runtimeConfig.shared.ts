@@ -5,7 +5,7 @@ import { parseUrl } from "@smithy/url-parser";
 import { fromBase64, toBase64 } from "@smithy/util-base64";
 import { fromUtf8, toUtf8 } from "@smithy/util-utf8";
 
-import { defaultAWSEventsHttpAuthSchemeProvider } from "./auth/httpAuthSchemeProvider";
+import { defaultEndpointRuleSetHttpAuthSchemeProvider } from "./auth/httpAuthSchemeProvider";
 import { defaultEndpointResolver } from "./endpoint/endpointResolver";
 import { EventBridgeClientConfig } from "./EventBridgeClient";
 
@@ -19,11 +19,16 @@ export const getRuntimeConfig = (config: EventBridgeClientConfig) => ({
   disableHostPrefix: config?.disableHostPrefix ?? false,
   endpointProvider: config?.endpointProvider ?? defaultEndpointResolver,
   extensions: config?.extensions ?? [],
-  httpAuthSchemeProvider: config?.httpAuthSchemeProvider ?? defaultAWSEventsHttpAuthSchemeProvider,
+  httpAuthSchemeProvider: config?.httpAuthSchemeProvider ?? defaultEndpointRuleSetHttpAuthSchemeProvider,
   httpAuthSchemes: config?.httpAuthSchemes ?? [
     {
       schemeId: "aws.auth#sigv4",
       identityProvider: (config: IdentityProviderConfig) => config.getIdentityProvider("aws.auth#sigv4"),
+      signer: new SigV4Signer(),
+    },
+    {
+      schemeId: "aws.auth#sigv4a",
+      identityProvider: (config: IdentityProviderConfig) => config.getIdentityProvider("aws.auth#sigv4a"),
       signer: new SigV4Signer(),
     },
   ],

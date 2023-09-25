@@ -154,6 +154,9 @@ export class RemoveTargetsCommand extends $Command<
       [SMITHY_CONTEXT_KEY]: {
         service: "AWSEvents",
         operation: "RemoveTargets",
+        endpointRuleSet: {
+          getEndpointParameterInstructions: RemoveTargetsCommand.getEndpointParameterInstructions,
+        },
       },
     };
     const { requestHandler } = configuration;

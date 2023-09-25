@@ -1,5 +1,7 @@
 // smithy-typescript generated code
 import {
+  createEndpointRuleSetHttpAuthSchemeParametersProvider,
+  createEndpointRuleSetHttpAuthSchemeProvider,
   DefaultIdentityProviderConfig,
   doesIdentityRequireRefresh,
   HttpAuthOption,
@@ -13,6 +15,8 @@ import {
 import { AwsCredentialIdentity, AwsCredentialIdentityProvider, Provider as __Provider } from "@smithy/types";
 import { getSmithyContext, normalizeProvider } from "@smithy/util-middleware";
 
+import { EndpointParameters } from "../endpoint/EndpointParameters";
+import { defaultEndpointResolver } from "../endpoint/endpointResolver";
 import { EventBridgeClientResolvedConfig } from "../EventBridgeClient";
 
 /**
@@ -49,6 +53,16 @@ export const defaultEventBridgeHttpAuthSchemeParametersProvider: EventBridgeHttp
 function createAwsAuthSigv4HttpAuthOption(authParameters: EventBridgeHttpAuthSchemeParameters): HttpAuthOption {
   return {
     schemeId: "aws.auth#sigv4",
+    signingProperties: {
+      name: "events",
+      region: authParameters.region,
+    },
+  };
+}
+
+function createAwsAuthSigv4aHttpAuthOption(authParameters: EventBridgeHttpAuthSchemeParameters): HttpAuthOption {
+  return {
+    schemeId: "aws.auth#sigv4a",
     signingProperties: {
       name: "events",
       region: authParameters.region,
@@ -123,9 +137,43 @@ export const resolveHttpAuthSchemeConfig = (config: HttpAuthSchemeInputConfig): 
     ...config,
     credentials,
     region,
-    httpAuthSchemeParametersProvider: defaultEventBridgeHttpAuthSchemeParametersProvider,
+    httpAuthSchemeParametersProvider: defaultEndpointRuleSetHttpAuthSchemeParametersProvider,
     identityProviderConfig: new DefaultIdentityProviderConfig({
       "aws.auth#sigv4": credentials,
     }),
   };
 };
+
+/**
+ * @internal
+ */
+export interface EventBridgeEndpointRuleSetHttpAuthSchemeParameters
+  extends EndpointParameters,
+    EventBridgeHttpAuthSchemeParameters {}
+
+/**
+ * @internal
+ */
+export interface EventBridgeEndpointRuleSetHttpAuthSchemeParametersProvider
+  extends HttpAuthSchemeParametersProvider<
+    EventBridgeClientResolvedConfig,
+    EventBridgeEndpointRuleSetHttpAuthSchemeParameters
+  > {}
+
+/**
+ * @internal
+ */
+export const defaultEndpointRuleSetHttpAuthSchemeParametersProvider: EventBridgeEndpointRuleSetHttpAuthSchemeParametersProvider =
+  createEndpointRuleSetHttpAuthSchemeParametersProvider(defaultEventBridgeHttpAuthSchemeParametersProvider);
+
+/**
+ * @internal
+ */
+export interface EventBridgeEndpointRuleSetHttpAuthSchemeProvider
+  extends HttpAuthSchemeProvider<EventBridgeEndpointRuleSetHttpAuthSchemeParameters> {}
+
+/**
+ * @internal
+ */
+export const defaultEndpointRuleSetHttpAuthSchemeProvider: EventBridgeEndpointRuleSetHttpAuthSchemeProvider =
+  createEndpointRuleSetHttpAuthSchemeProvider(defaultEndpointResolver, defaultEventBridgeHttpAuthSchemeProvider);
