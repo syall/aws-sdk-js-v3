@@ -14,7 +14,7 @@ const buildSmithyTypeScript = async (repo, commit) => {
   }
 
   // Checkout commit
-  await spawnProcess("git", ["fetch", "origin", commit, "--depth=1"], { cwd: repo });
+  // await spawnProcess("git", ["fetch", "origin", commit, "--depth=1"], { cwd: repo });
 
   // Switch to branch with commit
   const tempBranchName = `temp-${commit}`;
@@ -27,7 +27,7 @@ const buildSmithyTypeScript = async (repo, commit) => {
     await rm(repo, { recursive: true, force: true });
   } else {
     // Delete temp branch
-    await spawnProcess("git", ["checkout", "main"], { cwd: repo });
+    await spawnProcess("git", ["checkout", "-"], { cwd: repo });
     await spawnProcess("git", ["branch", "-D", tempBranchName], { cwd: repo });
   }
 };
