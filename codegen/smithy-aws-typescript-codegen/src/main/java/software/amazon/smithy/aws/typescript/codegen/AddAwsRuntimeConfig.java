@@ -94,13 +94,11 @@ public final class AddAwsRuntimeConfig implements TypeScriptIntegration {
             writer.writeDocs("Enables FIPS compatible endpoints.")
                     .write("useFipsEndpoint?: boolean | __Provider<boolean>;\n");
         }
-        if (!settings.getExperimentalIdentityAndAuth()) {
-            if (isSigV4Service(settings, model)) {
-                writer.writeDocs(isAwsService(settings, model)
-                                    ? "The AWS region to which this client will send requests"
-                                    : "The AWS region to use as signing region for AWS Auth")
-                        .write("region?: string | __Provider<string>;\n");
-            }
+        if (isSigV4Service(settings, model)) {
+            writer.writeDocs(isAwsService(settings, model)
+                                ? "The AWS region to which this client will send requests"
+                                : "The AWS region to use as signing region for AWS Auth")
+                    .write("region?: string | __Provider<string>;\n");
         }
     }
 
