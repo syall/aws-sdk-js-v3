@@ -16,8 +16,8 @@ import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
 import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSchemesIndex;
-import software.amazon.smithy.typescript.codegen.auth.http.integration.AddHttpBearerAuthPlugin;
 import software.amazon.smithy.typescript.codegen.auth.http.integration.HttpAuthTypeScriptIntegration;
+import software.amazon.smithy.typescript.codegen.auth.http.integration.SupportHttpBearerAuth;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -41,7 +41,7 @@ public final class AwsCustomizeHttpBearerTokenAuthPlugin implements HttpAuthType
      */
     @Override
     public List<String> runAfter() {
-        return List.of(AddHttpBearerAuthPlugin.class.getCanonicalName());
+        return List.of(SupportHttpBearerAuth.class.getCanonicalName());
     }
 
     @Override

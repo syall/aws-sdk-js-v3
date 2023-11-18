@@ -7,13 +7,15 @@ package software.amazon.smithy.aws.typescript.codegen.auth.http.integration;
 
 import java.util.Optional;
 import java.util.function.Consumer;
+import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.typescript.codegen.ApplicationProtocol;
-import software.amazon.smithy.typescript.codegen.ConfigField;
 import software.amazon.smithy.typescript.codegen.LanguageTarget;
 import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
+import software.amazon.smithy.typescript.codegen.auth.http.ConfigField;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthOptionProperty;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthSchemeParameter;
@@ -32,6 +34,24 @@ public final class AddSigV4AuthPlugin implements HttpAuthTypeScriptIntegration {
         w.addImport("SigV4Signer", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
         w.write("new SigV4Signer()");
     };
+    private static final Symbol AWS_CREDENTIAL_IDENTITY = Symbol.builder()
+        .name("AwsCredentialIdentity")
+        .namespace(TypeScriptDependency.SMITHY_TYPES.getPackageName(), "/")
+        .addDependency(TypeScriptDependency.SMITHY_TYPES)
+        .build();
+    private static final Symbol AWS_CREDENTIAL_IDENTITY_PROVIDER = Symbol.builder()
+        .name("AwsCredentialIdentityProvider")
+        .namespace(TypeScriptDependency.SMITHY_TYPES.getPackageName(), "/")
+        .addDependency(TypeScriptDependency.SMITHY_TYPES)
+        .build();
+    private static final SymbolReference PROVIDER = SymbolReference.builder()
+        .symbol(Symbol.builder()
+            .name("Provider")
+            .namespace(TypeScriptDependency.SMITHY_TYPES.getPackageName(), "/")
+            .addDependency(TypeScriptDependency.SMITHY_TYPES)
+            .build())
+        .alias("__Provider")
+        .build();
 
     /**
      * Integration should only be used if `experimentalIdentityAndAuth` flag is true.
@@ -51,49 +71,31 @@ public final class AddSigV4AuthPlugin implements HttpAuthTypeScriptIntegration {
                     .name("credentials")
                     .type(ConfigField.Type.MAIN)
                     .docs(w -> w.write("The credentials used to sign requests."))
-                    .inputType(w -> {
-                        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
-                        w.addImport("AwsCredentialIdentity", null, TypeScriptDependency.SMITHY_TYPES);
-                        w.addImport("AwsCredentialIdentityProvider", null, TypeScriptDependency.SMITHY_TYPES);
-                        w.write("AwsCredentialIdentity | AwsCredentialIdentityProvider");
-                    })
-                    .resolvedType(w -> {
-                        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
-                        w.addImport("AwsCredentialIdentityProvider", null, TypeScriptDependency.SMITHY_TYPES);
-                        w.write("AwsCredentialIdentityProvider");
-                    })
-                    .configFieldWriter(ConfigField::writeDefaultMainConfigField)
+                    .inputType(Symbol.builder()
+                        .name("AwsCredentialIdentity | AwsCredentialIdentityProvider")
+                        .addReference(AWS_CREDENTIAL_IDENTITY)
+                        .addReference(AWS_CREDENTIAL_IDENTITY_PROVIDER)
+                        .build())
+                    .resolvedType(Symbol.builder()
+                        .name("AwsCredentialIdentityProvider")
+                        .addReference(AWS_CREDENTIAL_IDENTITY)
+                        .addReference(AWS_CREDENTIAL_IDENTITY_PROVIDER)
+                        .build())
+                    .configFieldWriter(ConfigField::defaultMainConfigFieldWriter)
                     .build())
                 .addConfigField(ConfigField.builder()
                     .name("region")
                     .type(ConfigField.Type.AUXILIARY)
                     .docs(w -> w.write("The AWS region to which this client will send requests."))
-                    .inputType(w -> {
-                        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
-                        w.addImport("Provider", "__Provider", TypeScriptDependency.SMITHY_TYPES);
-                        w.write("string | __Provider<string>");
-                    })
-                    .resolvedType(w -> {
-                        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
-                        w.addImport("Provider", "__Provider", TypeScriptDependency.SMITHY_TYPES);
-                        w.write("__Provider<string>");
-                    })
-                    .configFieldWriter(ConfigField::writeDefaultAuxiliaryConfigField)
-                    .build())
-                .addConfigField(ConfigField.builder()
-                    .name("sha256")
-                    .type(ConfigField.Type.PREVIOUSLY_RESOLVED)
-                    .resolvedType(w -> {
-                        w.addDependency(TypeScriptDependency.SMITHY_TYPES);
-                        w.addImport("ChecksumConstructor", null, TypeScriptDependency.SMITHY_TYPES);
-                        w.addImport("HashConstructor", null, TypeScriptDependency.SMITHY_TYPES);
-                        w.write("ChecksumConstructor | HashConstructor");
-                    })
-                    .build())
-                .addConfigField(ConfigField.builder()
-                    .name("signingName")
-                    .type(ConfigField.Type.PREVIOUSLY_RESOLVED)
-                    .resolvedType(w -> w.write("string"))
+                    .inputType(Symbol.builder()
+                        .name("string | __Provider<string>")
+                        .addReference(PROVIDER)
+                        .build())
+                    .resolvedType(Symbol.builder()
+                        .name("__Provider<string>")
+                        .addReference(PROVIDER)
+                        .build())
+                    .configFieldWriter(ConfigField::defaultAuxiliaryConfigFieldWriter)
                     .build())
                 .addHttpAuthSchemeParameter(HttpAuthSchemeParameter.builder()
                     .name("region")
