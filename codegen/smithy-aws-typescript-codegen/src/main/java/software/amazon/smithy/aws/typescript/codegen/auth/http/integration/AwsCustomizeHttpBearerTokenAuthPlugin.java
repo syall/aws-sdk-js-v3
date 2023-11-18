@@ -54,26 +54,36 @@ public final class AwsCustomizeHttpBearerTokenAuthPlugin implements HttpAuthType
         if (isAwsService(service)) {
             HttpAuthScheme authScheme = supportedHttpAuthSchemesIndex.getHttpAuthScheme(HttpBearerAuthTrait.ID)
                 .toBuilder()
-                // Current behavior of unconfigured `token` is to throw an error.
-                // This may need to be customized if a service is released with multiple auth schemes.
-                .putDefaultIdentityProvider(LanguageTarget.BROWSER, w ->
-                    w.write("async () => { throw new Error(\"`token` is missing\"); }"))
                 // Use `@aws-sdk/token-providers` as the default identity provider chain for Node.js
-                .putDefaultIdentityProvider(LanguageTarget.NODE, w -> {
-                    w.addDependency(AwsDependency.TOKEN_PROVIDERS);
-                    w.addImport("nodeProvider", null, AwsDependency.TOKEN_PROVIDERS);
-                    w.write("async (idProps) => await nodeProvider(idProps?.__config || {})(idProps)");
-                })
-                // Add __config as an identityProperty for backward compatibility of the `nodeProvider` default provider
-                .propertiesExtractor(s -> w -> w.write("""
-                    (__config, context) => ({
-                        /**
-                         * @internal
-                         */
-                        identityProperties: {
-                            __config,
-                        },
-                    }),"""))
+                .putDefaultIdentityProvider(LanguageTarget.NODE, w -> w
+                    .addDependency(AwsDependency.TOKEN_PROVIDERS)
+                    .addImport("nodeProvider", null, AwsDependency.TOKEN_PROVIDERS)
+                    .addImport("FromSsoInit", null, AwsDependency.TOKEN_PROVIDERS)
+                    .write("async (idProps) => await nodeProvider(idProps as FromSsoInit)(idProps)"))
+                // Add identityProperties for backward compatibility of the `nodeProvider` default provider
+                // If adding new properties that need to be passed into `nodeProvider`, make sure
+                // to update the propertiesExtractor below.
+                // However, the goal should be to NOT add additional properties as needed.
+                .propertiesExtractor(s -> w -> w
+                    .addDependency(AwsDependency.TOKEN_PROVIDERS)
+                    .addImport("FromSsoInit", null, AwsDependency.TOKEN_PROVIDERS)
+                    .write("""
+                        <T>({
+                          profile,
+                          filepath,
+                          configFilepath,
+                          ignoreCache,
+                        }: T & FromSsoInit, context: unknown) => ({
+                          /**
+                           * @internal
+                           */
+                          identityProperties: {
+                            profile,
+                            filepath,
+                            configFilepath,
+                            ignoreCache,
+                          },
+                        }),"""))
                 .build();
             supportedHttpAuthSchemesIndex.putHttpAuthScheme(authScheme.getSchemeId(), authScheme);
         }
