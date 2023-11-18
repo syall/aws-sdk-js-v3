@@ -3,9 +3,7 @@ import { doesIdentityRequireRefresh, isIdentityExpired, memoizeIdentityProvider 
 import {
   AwsCredentialIdentity,
   AwsCredentialIdentityProvider,
-  ChecksumConstructor,
   HandlerExecutionContext,
-  HashConstructor,
   HttpAuthOption,
   HttpAuthScheme,
   HttpAuthSchemeParameters,
@@ -161,15 +159,11 @@ export interface HttpAuthSchemeResolvedConfig {
   readonly credentials?: AwsCredentialIdentityProvider;
 }
 
-interface PreviouslyResolved {
-  readonly sha256: ChecksumConstructor | HashConstructor;
-}
-
 /**
  * @internal
  */
 export const resolveHttpAuthSchemeConfig = <T>(
-  config: T & HttpAuthSchemeInputConfig & PreviouslyResolved
+  config: T & HttpAuthSchemeInputConfig
 ): T & HttpAuthSchemeResolvedConfig => {
   const credentials = memoizeIdentityProvider(config.credentials, isIdentityExpired, doesIdentityRequireRefresh);
   return {
