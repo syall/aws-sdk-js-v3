@@ -75,8 +75,8 @@ public final class AddSTSAuthCustomizations implements HttpAuthTypeScriptIntegra
     @Override
     public List<String> runAfter() {
         return List.of(
-            AddSigV4AuthPlugin.class.getCanonicalName(),
-            AwsCustomizeSigv4AuthPlugin.class.getCanonicalName());
+            SupportSigV4Auth.class.getCanonicalName(),
+            AwsSdkCustomizeSigV4Auth.class.getCanonicalName());
     }
 
     @Override

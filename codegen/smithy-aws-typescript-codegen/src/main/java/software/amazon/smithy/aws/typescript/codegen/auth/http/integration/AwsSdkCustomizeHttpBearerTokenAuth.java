@@ -26,7 +26,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * This is the experimental behavior for `experimentalIdentityAndAuth`.
  */
 @SmithyInternalApi
-public final class AwsCustomizeHttpBearerTokenAuthPlugin implements HttpAuthTypeScriptIntegration {
+public final class AwsSdkCustomizeHttpBearerTokenAuth implements HttpAuthTypeScriptIntegration {
 
     /**
      * Integration should only be used if `experimentalIdentityAndAuth` flag is true.
@@ -36,9 +36,6 @@ public final class AwsCustomizeHttpBearerTokenAuthPlugin implements HttpAuthType
         return settings.getExperimentalIdentityAndAuth();
     }
 
-    /**
-     * Run after default AddHttpBearerAuthPlugin.
-     */
     @Override
     public List<String> runAfter() {
         return List.of(SupportHttpBearerAuth.class.getCanonicalName());
@@ -60,10 +57,10 @@ public final class AwsCustomizeHttpBearerTokenAuthPlugin implements HttpAuthType
                     .addImport("nodeProvider", null, AwsDependency.TOKEN_PROVIDERS)
                     .addImport("FromSsoInit", null, AwsDependency.TOKEN_PROVIDERS)
                     .write("async (idProps) => await nodeProvider(idProps as FromSsoInit)(idProps)"))
-                // Add identityProperties for backward compatibility of the `nodeProvider` default provider
+                // Add identityProperties for backward compatibility of the `nodeProvider` default provider.
                 // If adding new properties that need to be passed into `nodeProvider`, make sure
                 // to update the propertiesExtractor below.
-                // However, the goal should be to NOT add additional properties as needed.
+                // However, the goal should be to NOT add additional properties.
                 .propertiesExtractor(s -> w -> w
                     .addDependency(AwsDependency.TOKEN_PROVIDERS)
                     .addImport("FromSsoInit", null, AwsDependency.TOKEN_PROVIDERS)

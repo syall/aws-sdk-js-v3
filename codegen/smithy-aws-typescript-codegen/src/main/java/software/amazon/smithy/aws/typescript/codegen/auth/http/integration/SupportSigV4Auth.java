@@ -28,7 +28,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * This is the experimental behavior for `experimentalIdentityAndAuth`.
  */
 @SmithyInternalApi
-public final class AddSigV4AuthPlugin implements HttpAuthTypeScriptIntegration {
+public final class SupportSigV4Auth implements HttpAuthTypeScriptIntegration {
     private static final Consumer<TypeScriptWriter> AWS_SIGV4_AUTH_SIGNER = w -> {
         w.addDependency(TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);
         w.addImport("SigV4Signer", null, TypeScriptDependency.EXPERIMENTAL_IDENTITY_AND_AUTH);

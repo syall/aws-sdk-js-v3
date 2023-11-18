@@ -37,7 +37,7 @@ import software.amazon.smithy.utils.SmithyInternalApi;
  * This is the experimental behavior for `experimentalIdentityAndAuth`.
  */
 @SmithyInternalApi
-public class AwsCustomizeSigv4AuthPlugin implements HttpAuthTypeScriptIntegration {
+public class AwsSdkCustomizeSigV4Auth implements HttpAuthTypeScriptIntegration {
 
     /**
      * Integration should only be used if `experimentalIdentityAndAuth` flag is true.
@@ -47,12 +47,9 @@ public class AwsCustomizeSigv4AuthPlugin implements HttpAuthTypeScriptIntegratio
         return settings.getExperimentalIdentityAndAuth();
     }
 
-    /**
-     * Run after default AddSigV4AuthPlugin.
-     */
     @Override
     public List<String> runAfter() {
-        return List.of(AddSigV4AuthPlugin.class.getCanonicalName());
+        return List.of(SupportSigV4Auth.class.getCanonicalName());
     }
 
     @Override
@@ -63,20 +60,20 @@ public class AwsCustomizeSigv4AuthPlugin implements HttpAuthTypeScriptIntegratio
         TypeScriptWriter writer
     ) {
         ServiceShape service = settings.getService(model);
-        // TODO(experimentalIdentityAndAuth): separate generic codegen from SDK tech debt
-        if (isAwsService(service) && isSigV4Service(service) && !areAllOptionalAuthOperations(model, service)) {
-            writer
-                .addImport("AwsCredentialIdentityProvider", null, TypeScriptDependency.SMITHY_TYPES)
-                .writeDocs("""
-                    Default credentials provider; Not available in browser runtime.
-                    @deprecated
-                    @internal""")
-                .write("credentialDefaultProvider?: (input: any) => AwsCredentialIdentityProvider;\n");
-        }
         if (isAwsService(service) && isSigV4Service(service)) {
             writer
                 .writeDocs("The AWS region to which this client will send requests")
                 .write("region?: string | __Provider<string>;\n");
+            if (!areAllOptionalAuthOperations(model, service)) {
+
+                writer
+                    .addImport("AwsCredentialIdentityProvider", null, TypeScriptDependency.SMITHY_TYPES)
+                    .writeDocs("""
+                        Default credentials provider; Not available in browser runtime.
+                        @deprecated
+                        @internal""")
+                    .write("credentialDefaultProvider?: (input: any) => AwsCredentialIdentityProvider;\n");
+            }
         }
     }
 
@@ -136,34 +133,8 @@ public class AwsCustomizeSigv4AuthPlugin implements HttpAuthTypeScriptIntegratio
         ServiceShape service = settings.getService(model);
         if (isAwsService(service)) {
             HttpAuthScheme authScheme = supportedHttpAuthSchemesIndex.getHttpAuthScheme(SigV4Trait.ID).toBuilder()
-                // Current behavior of unconfigured `credentials` is to throw an error.
-                // This may need to be customized if a service is released with multiple auth schemes.
-                .putDefaultIdentityProvider(LanguageTarget.BROWSER, w ->
-                    w.write("async () => { throw new Error(\"`credentials` is missing\"); }"))
-                // Use `@aws-sdk/credential-provider-node` with `@aws-sdk/client-sts` as the
-                // default identity provider chain for Node.js
-                .putDefaultIdentityProvider(LanguageTarget.NODE, w -> {
-                    w.addDependency(AwsDependency.STS_CLIENT);
-                    w.addImport("decorateDefaultCredentialProvider", null, AwsDependency.STS_CLIENT);
-                    w.addDependency(AwsDependency.CREDENTIAL_PROVIDER_NODE);
-                    w.addImport("defaultProvider", "credentialDefaultProvider",
-                        AwsDependency.CREDENTIAL_PROVIDER_NODE);
-                    w.write("""
-                        async (idProps) => await \
-                        decorateDefaultCredentialProvider(credentialDefaultProvider)(idProps?.__config || {})()""");
-                })
                 .removeConfigField("region")
                 .removeConfigField("signingName")
-                // Add __config as an identityProperty for backward compatibility of `credentialDefaultProvider`
-                .propertiesExtractor(s -> w -> w.write("""
-                    (__config, context) => ({
-                        /**
-                         * @internal
-                         */
-                        identityProperties: {
-                            __config,
-                        },
-                    }),"""))
                 .build();
             supportedHttpAuthSchemesIndex.putHttpAuthScheme(authScheme.getSchemeId(), authScheme);
         }
