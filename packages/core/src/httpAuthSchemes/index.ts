@@ -1,1 +1,1 @@
-export * from "./AWSSDK_sigv4";
+export * from "./aws-sdk";

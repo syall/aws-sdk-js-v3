@@ -3,7 +3,7 @@
 import packageInfo from "../package.json"; // eslint-disable-line
 
 import { decorateDefaultCredentialProvider } from "./defaultStsRoleAssumers";
-import { emitWarningIfUnsupportedVersion as awsCheckVersion } from "@aws-sdk/core";
+import { AWSSDKSigV4Signer, emitWarningIfUnsupportedVersion as awsCheckVersion } from "@aws-sdk/core";
 import { defaultProvider as credentialDefaultProvider } from "@aws-sdk/credential-provider-node";
 import { defaultUserAgent } from "@aws-sdk/util-user-agent-node";
 import {
@@ -13,7 +13,6 @@ import {
   NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS,
 } from "@smithy/config-resolver";
 import { NoAuthSigner } from "@smithy/core";
-import { SigV4Signer } from "@smithy/experimental-identity-and-auth";
 import { Hash } from "@smithy/hash-node";
 import { NODE_MAX_ATTEMPT_CONFIG_OPTIONS, NODE_RETRY_MODE_CONFIG_OPTIONS } from "@smithy/middleware-retry";
 import { loadConfig as loadNodeConfig } from "@smithy/node-config-provider";
@@ -54,7 +53,7 @@ export const getRuntimeConfig = (config: STSClientConfig) => {
           ipc.getIdentityProvider("aws.auth#sigv4") ||
           (async (idProps) =>
             await decorateDefaultCredentialProvider(credentialDefaultProvider)(idProps?.__config || {})()),
-        signer: new SigV4Signer(),
+        signer: new AWSSDKSigV4Signer(),
       },
       {
         schemeId: "smithy.api#noAuth",

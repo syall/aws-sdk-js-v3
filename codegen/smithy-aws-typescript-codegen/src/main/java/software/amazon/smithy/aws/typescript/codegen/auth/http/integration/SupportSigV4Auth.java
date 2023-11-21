@@ -122,6 +122,18 @@ public final class SupportSigV4Auth implements HttpAuthTypeScriptIntegration {
                         w.write("authParameters.region");
                     })
                     .build())
+                .propertiesExtractor(s -> w -> w
+                    .write("""
+                        (config, context) => {
+                          return {
+                            /**
+                             * @internal
+                             */
+                            signingProperties: {
+                              context,
+                            },
+                          };
+                        },"""))
                 .build());
     }
 }

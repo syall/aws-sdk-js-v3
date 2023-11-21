@@ -100,7 +100,7 @@ export interface AWSSDKSigV4AuthResolvedConfig {
  */
 export const resolveAWSSDKSigV4Config = <T>(
   input: T & AWSSDKSigV4AuthInputConfig & AWSSDKSigV4PreviouslyResolved
-): T & AWSSDKSigV4AuthResolvedConfig => {
+): T & AWSSDKSigV4AuthResolvedConfig & AWSSDKSigV4PreviouslyResolved => {
   const normalizedCreds = input.credentials
     ? memoizeIdentityProvider(input.credentials, isIdentityExpired, doesIdentityRequireRefresh)
     : input.credentialDefaultProvider(input as any);
@@ -142,7 +142,7 @@ export const resolveAWSSDKSigV4Config = <T>(
 
           const params: SignatureV4Init & SignatureV4CryptoInit = {
             ...input,
-            credentials: normalizedCreds,
+            credentials: normalizedCreds!,
             region: input.signingRegion,
             service: input.signingName,
             sha256,
@@ -178,7 +178,7 @@ export const resolveAWSSDKSigV4Config = <T>(
 
       const params: SignatureV4Init & SignatureV4CryptoInit = {
         ...input,
-        credentials: normalizedCreds,
+        credentials: normalizedCreds!,
         region: input.signingRegion,
         service: input.signingName,
         sha256,

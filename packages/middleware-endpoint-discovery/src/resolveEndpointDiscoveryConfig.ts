@@ -3,7 +3,7 @@ import { AwsCredentialIdentity, MemoizedProvider, Provider } from "@smithy/types
 
 export interface PreviouslyResolved {
   isCustomEndpoint?: boolean;
-  credentials: MemoizedProvider<AwsCredentialIdentity>;
+  credentials?: MemoizedProvider<AwsCredentialIdentity>;
   endpointDiscoveryEnabledProvider: Provider<boolean | undefined>;
 }
 
@@ -27,6 +27,10 @@ export interface EndpointDiscoveryInputConfig {
   endpointDiscoveryEnabled?: boolean | undefined;
 }
 export interface EndpointDiscoveryResolvedConfig {
+  /**
+   * Endpoint Discovery requires credentials to resolve, otherwise an error will be thrown.
+   */
+  credentials: MemoizedProvider<AwsCredentialIdentity>;
   /**
    * LRU Cache which stores endpoints from endpoint discovery operations.
    * The size is either provided by {@link EndpointDiscoveryInputConfig.endpointCacheSize}.
@@ -62,13 +66,19 @@ export interface EndpointDiscoveryConfigOptions {
 export const resolveEndpointDiscoveryConfig = <T>(
   input: T & PreviouslyResolved & EndpointDiscoveryInputConfig,
   { endpointDiscoveryCommandCtor }: EndpointDiscoveryConfigOptions
-): T & EndpointDiscoveryResolvedConfig => ({
-  ...input,
-  endpointDiscoveryCommandCtor,
-  endpointCache: new EndpointCache(input.endpointCacheSize ?? 1000),
-  endpointDiscoveryEnabled:
-    input.endpointDiscoveryEnabled !== undefined
-      ? () => Promise.resolve(input.endpointDiscoveryEnabled)
-      : input.endpointDiscoveryEnabledProvider,
-  isClientEndpointDiscoveryEnabled: input.endpointDiscoveryEnabled !== undefined,
-});
+): T & EndpointDiscoveryResolvedConfig => {
+  if (!input.credentials) {
+    throw new Error("`Credentials` is missing");
+  }
+  return {
+    ...input,
+    credentials: input.credentials!,
+    endpointDiscoveryCommandCtor,
+    endpointCache: new EndpointCache(input.endpointCacheSize ?? 1000),
+    endpointDiscoveryEnabled:
+      input.endpointDiscoveryEnabled !== undefined
+        ? () => Promise.resolve(input.endpointDiscoveryEnabled)
+        : input.endpointDiscoveryEnabledProvider,
+    isClientEndpointDiscoveryEnabled: input.endpointDiscoveryEnabled !== undefined,
+  };
+};

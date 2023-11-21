@@ -62,6 +62,16 @@ function createAwsAuthSigv4HttpAuthOption(authParameters: WeatherHttpAuthSchemeP
       name: "weather",
       region: authParameters.region,
     },
+    propertiesExtractor: (config, context) => {
+      return {
+        /**
+         * @internal
+         */
+        signingProperties: {
+          context,
+        },
+      };
+    },
   };
 }
 

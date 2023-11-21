@@ -18,34 +18,34 @@ import {
 } from "@smithy/types";
 import { getSmithyContext, normalizeProvider } from "@smithy/util-middleware";
 
-import { STSClient, STSClientConfig, STSClientResolvedConfig } from "../STSClient";
+import { DynamoDBClientResolvedConfig } from "../DynamoDBClient";
 
 /**
  * @internal
  */
-export interface STSHttpAuthSchemeParameters extends HttpAuthSchemeParameters {
+export interface DynamoDBHttpAuthSchemeParameters extends HttpAuthSchemeParameters {
   region?: string;
 }
 
 /**
  * @internal
  */
-export interface STSHttpAuthSchemeParametersProvider
+export interface DynamoDBHttpAuthSchemeParametersProvider
   extends HttpAuthSchemeParametersProvider<
-    STSClientResolvedConfig,
+    DynamoDBClientResolvedConfig,
     HandlerExecutionContext,
-    STSHttpAuthSchemeParameters,
+    DynamoDBHttpAuthSchemeParameters,
     object
   > {}
 
 /**
  * @internal
  */
-export const defaultSTSHttpAuthSchemeParametersProvider = async (
-  config: STSClientResolvedConfig,
+export const defaultDynamoDBHttpAuthSchemeParametersProvider = async (
+  config: DynamoDBClientResolvedConfig,
   context: HandlerExecutionContext,
   input: object
-): Promise<STSHttpAuthSchemeParameters> => {
+): Promise<DynamoDBHttpAuthSchemeParameters> => {
   return {
     operation: getSmithyContext(context).operation as string,
     region:
@@ -56,11 +56,11 @@ export const defaultSTSHttpAuthSchemeParametersProvider = async (
   };
 };
 
-function createAwsAuthSigv4HttpAuthOption(authParameters: STSHttpAuthSchemeParameters): HttpAuthOption {
+function createAwsAuthSigv4HttpAuthOption(authParameters: DynamoDBHttpAuthSchemeParameters): HttpAuthOption {
   return {
     schemeId: "aws.auth#sigv4",
     signingProperties: {
-      name: "sts",
+      name: "dynamodb",
       region: authParameters.region,
     },
     propertiesExtractor: (config, context) => ({
@@ -74,52 +74,23 @@ function createAwsAuthSigv4HttpAuthOption(authParameters: STSHttpAuthSchemeParam
   };
 }
 
-function createSmithyApiNoAuthHttpAuthOption(authParameters: STSHttpAuthSchemeParameters): HttpAuthOption {
-  return {
-    schemeId: "smithy.api#noAuth",
-  };
-}
+/**
+ * @internal
+ */
+export interface DynamoDBHttpAuthSchemeProvider extends HttpAuthSchemeProvider<DynamoDBHttpAuthSchemeParameters> {}
 
 /**
  * @internal
  */
-export interface STSHttpAuthSchemeProvider extends HttpAuthSchemeProvider<STSHttpAuthSchemeParameters> {}
-
-/**
- * @internal
- */
-export const defaultSTSHttpAuthSchemeProvider: STSHttpAuthSchemeProvider = (authParameters) => {
+export const defaultDynamoDBHttpAuthSchemeProvider: DynamoDBHttpAuthSchemeProvider = (authParameters) => {
   const options: HttpAuthOption[] = [];
   switch (authParameters.operation) {
-    case "AssumeRoleWithSAML": {
-      options.push(createSmithyApiNoAuthHttpAuthOption(authParameters));
-      break;
-    }
-    case "AssumeRoleWithWebIdentity": {
-      options.push(createSmithyApiNoAuthHttpAuthOption(authParameters));
-      break;
-    }
     default: {
       options.push(createAwsAuthSigv4HttpAuthOption(authParameters));
     }
   }
   return options;
 };
-
-export interface StsAuthInputConfig {}
-
-export interface StsAuthResolvedConfig {
-  /**
-   * Reference to STSClient class constructor.
-   * @internal
-   */
-  stsClientCtor: new (config: STSClientConfig) => STSClient;
-}
-
-export const resolveStsAuthConfig = <T>(input: T): T & StsAuthResolvedConfig => ({
-  ...input,
-  stsClientCtor: STSClient,
-});
 
 /**
  * @internal
@@ -135,7 +106,7 @@ export interface HttpAuthSchemeInputConfig extends AWSSDKSigV4AuthInputConfig {
    * experimentalIdentityAndAuth: Configuration of an HttpAuthSchemeProvider for a client which resolves which HttpAuthScheme to use.
    * @internal
    */
-  httpAuthSchemeProvider?: STSHttpAuthSchemeProvider;
+  httpAuthSchemeProvider?: DynamoDBHttpAuthSchemeProvider;
 
   /**
    * The credentials used to sign requests.
@@ -157,7 +128,7 @@ export interface HttpAuthSchemeResolvedConfig extends AWSSDKSigV4AuthResolvedCon
    * experimentalIdentityAndAuth: Configuration of an HttpAuthSchemeProvider for a client which resolves which HttpAuthScheme to use.
    * @internal
    */
-  readonly httpAuthSchemeProvider: STSHttpAuthSchemeProvider;
+  readonly httpAuthSchemeProvider: DynamoDBHttpAuthSchemeProvider;
 
   /**
    * The credentials used to sign requests.

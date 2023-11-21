@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import software.amazon.smithy.aws.traits.auth.SigV4Trait;
 import software.amazon.smithy.aws.typescript.codegen.AwsDependency;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
@@ -26,6 +27,7 @@ import software.amazon.smithy.typescript.codegen.TypeScriptDependency;
 import software.amazon.smithy.typescript.codegen.TypeScriptSettings;
 import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.auth.http.HttpAuthScheme;
+import software.amazon.smithy.typescript.codegen.auth.http.ResolveConfigFunction;
 import software.amazon.smithy.typescript.codegen.auth.http.SupportedHttpAuthSchemesIndex;
 import software.amazon.smithy.typescript.codegen.auth.http.integration.HttpAuthTypeScriptIntegration;
 import software.amazon.smithy.utils.MapUtils;
@@ -135,6 +137,42 @@ public class AwsSdkCustomizeSigV4Auth implements HttpAuthTypeScriptIntegration {
             HttpAuthScheme authScheme = supportedHttpAuthSchemesIndex.getHttpAuthScheme(SigV4Trait.ID).toBuilder()
                 .removeConfigField("region")
                 .removeConfigField("signingName")
+                .propertiesExtractor(s -> w -> w
+                    .write("""
+                      (config, context) => ({
+                        /**
+                         * @internal
+                         */
+                        signingProperties: {
+                          context,
+                        },
+                      }),"""))
+                .addResolveConfigFunction(ResolveConfigFunction.builder()
+                    .resolveConfigFunction(Symbol.builder()
+                        .name("resolveAWSSDKSigV4Config")
+                        .namespace(AwsDependency.AWS_SDK_CORE.getPackageName(), "/")
+                        .addDependency(AwsDependency.AWS_SDK_CORE)
+                        .build())
+                    .inputConfig(Symbol.builder()
+                        .name("AWSSDKSigV4AuthInputConfig")
+                        .namespace(AwsDependency.AWS_SDK_CORE.getPackageName(), "/")
+                        .addDependency(AwsDependency.AWS_SDK_CORE)
+                        .build())
+                    .previouslyResolved(Symbol.builder()
+                        .name("AWSSDKSigV4PreviouslyResolved")
+                        .namespace(AwsDependency.AWS_SDK_CORE.getPackageName(), "/")
+                        .addDependency(AwsDependency.AWS_SDK_CORE)
+                        .build())
+                    .resolvedConfig(Symbol.builder()
+                        .name("AWSSDKSigV4AuthResolvedConfig")
+                        .namespace(AwsDependency.AWS_SDK_CORE.getPackageName(), "/")
+                        .addDependency(AwsDependency.AWS_SDK_CORE)
+                        .build())
+                    .build())
+                .putDefaultSigner(LanguageTarget.SHARED, w -> w
+                    .addDependency(AwsDependency.AWS_SDK_CORE)
+                    .addImport("AWSSDKSigV4Signer", null, AwsDependency.AWS_SDK_CORE)
+                    .write("new AWSSDKSigV4Signer()"))
                 .build();
             supportedHttpAuthSchemesIndex.putHttpAuthScheme(authScheme.getSchemeId(), authScheme);
         }
