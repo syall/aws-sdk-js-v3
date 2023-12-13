@@ -105,6 +105,9 @@ tasks.register("generate-smithy-build") {
             ).expectObjectNode()
             val experimentalIdentityAndAuthServices = setOf(
                 ShapeId.from("com.amazonaws.codecatalyst#CodeCatalyst"),
+                ShapeId.from("com.amazonaws.lexruntimev2#AWSDeepSenseRunTimeServiceApi2_0"),
+                ShapeId.from("com.amazonaws.rekognitionstreaming#RekognitionStreamingService"),
+                ShapeId.from("com.amazonaws.transcribestreaming#Transcribe"),
             )
             val projectionContents = Node.objectNodeBuilder()
                     .withMember("imports", Node.fromStrings("${models.getAbsolutePath()}${File.separator}${file.name}"))
