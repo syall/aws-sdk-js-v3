@@ -19,16 +19,11 @@ import static software.amazon.smithy.typescript.codegen.TypeScriptDependency.DEV
 import static software.amazon.smithy.typescript.codegen.TypeScriptDependency.NORMAL_DEPENDENCY;
 import static software.amazon.smithy.typescript.codegen.TypeScriptDependency.PEER_DEPENDENCY;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.typescript.codegen.Dependency;
-import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.SmithyInternalApi;
 
 /**
@@ -125,32 +120,10 @@ public enum AwsDependency implements Dependency {
     }
 
     private static final class SdkVersion {
-        private static final Map<String, String> VERSIONS;
-
-        static {
-            String rawProperties =
-                    IoUtils.readUtf8Url(AwsDependency.class.getResource("sdkVersions.properties")).trim();
-            Properties p = new Properties();
-            try {
-                p.load(new StringReader(rawProperties));
-            } catch (IOException e) {
-                throw new IllegalArgumentException("Could not read sdkVersions.properties");
-            }
-
-            final Map<String, String> versions = new HashMap<>(p.size());
-            p.forEach((k, v) -> {
-                if (versions.put(k.toString(), v.toString()) != null) {
-                    throw new IllegalArgumentException("Multiple versions defined for " + k.toString());
-                }
-            });
-            VERSIONS = Collections.unmodifiableMap(versions);
-        }
+        private static final Map<String, String> VERSIONS = Collections.emptyMap();
 
         private static String expectVersion(String packageName) {
-            if (!VERSIONS.containsKey(packageName)) {
-                throw new IllegalArgumentException("No version for " + packageName);
-            }
-            return VERSIONS.get(packageName);
+            return VERSIONS.getOrDefault(packageName, "latest");
         }
     }
 }
