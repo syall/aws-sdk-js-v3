@@ -269,14 +269,7 @@ class QueryShapeSerVisitor extends DocumentShapeSerVisitor {
         Shape targetShape = context.getModel().expectShape(memberShape.getTarget());
 
         if (targetShape.isListShape() || targetShape.isSetShape()) {
-            writer.openBlock(
-                "if ($L?.length === 0) {",
-                "}",
-                inputLocation,
-                () -> {
-                    writer.write("$L = []", PropertyAccessor.getFrom("entries", locationName));
-                }
-            );
+            serializeEmptyNamedMemberEntryList(writer, locationName, inputLocation);
         }
 
         // Consolidate every entry in the list.
@@ -290,6 +283,29 @@ class QueryShapeSerVisitor extends DocumentShapeSerVisitor {
 
             writer.write("entries[loc] = value;");
         });
+    }
+
+    /**
+     * Write serialization for empty lists.
+     *
+     * @param writer TypeScript writer.
+     * @param locationName Location to set the serialized value.
+     * @param inputLocation Location to get the to-serialize value.
+     */
+    @SmithyInternalApi
+    protected void serializeEmptyNamedMemberEntryList(
+        TypeScriptWriter writer,
+        String locationName,
+        String inputLocation
+    ) {
+        writer.openBlock(
+            "if ($L?.length === 0) {",
+            "}",
+            inputLocation,
+            () -> {
+                writer.write("$L = []", PropertyAccessor.getFrom("entries", locationName));
+            }
+        );
     }
 
     /**

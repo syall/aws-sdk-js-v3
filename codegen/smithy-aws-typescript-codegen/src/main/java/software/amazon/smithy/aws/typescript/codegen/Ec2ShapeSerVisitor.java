@@ -23,6 +23,7 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 import software.amazon.smithy.model.traits.XmlNameTrait;
+import software.amazon.smithy.typescript.codegen.TypeScriptWriter;
 import software.amazon.smithy.typescript.codegen.integration.ProtocolGenerator.GenerationContext;
 import software.amazon.smithy.utils.SmithyInternalApi;
 import software.amazon.smithy.utils.StringUtils;
@@ -73,6 +74,15 @@ final class Ec2ShapeSerVisitor extends QueryShapeSerVisitor {
                 .map(XmlNameTrait::getValue)
                 .map(StringUtils::capitalize)
                 .orElseGet(() -> StringUtils.capitalize(defaultValue));
+    }
+
+    @Override
+    protected void serializeEmptyNamedMemberEntryList(
+        TypeScriptWriter writer,
+        String locationName,
+        String inputLocation
+    ) {
+        // EC2 does not serialize empty lists: no-op
     }
 
     @Override
